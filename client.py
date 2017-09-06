@@ -7,6 +7,8 @@ import logging
 import sys
 import datetime
 import geofence
+import storage
+import time
 
 try:
     from qpid.messaging import Connection, Message, MessagingError, Empty
@@ -19,7 +21,6 @@ log.setLevel(logging.DEBUG)
 
 ch = logging.StreamHandler(stream=sys.stdout)
 log.addHandler(ch)
-
 
 
 class NordicWaysIC:
@@ -104,8 +105,27 @@ if __name__ == '__main__':
     # Main loop
     while True:
         fences = geofence.fetch_objects()
-        if fences:
-            pass
+        if not fences:
+            log.debug("No geofence objects..")
+            time.sleep(5)
+
+
+        # TODO: Check if returned JSON has paging. If so, fetch the rest of
+        #       the geofence objects
+        for fence in fences.get("objekter"):
+            if not storage.exists(fence):
+                # New object
+                storage.add(fence)
+                log.info("New object - schedule event to NordicWayIC with new datex2 doc")
+            else:
+                if storage.is_modified(fence):
+                    storage.update(geofence)
+                    log.info("SCHEDULE A NEW EVENT TO NordicWayIC WITH NEW DATEX2 document!")
+                else:
+                    log.debug("geofence is already in db and has not been updated. Do nothing!")
+
+        log.debug("Done. Sleep until next check.")
+        time.sleep(5)
 
     ic.close()
 
