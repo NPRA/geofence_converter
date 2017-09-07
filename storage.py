@@ -4,7 +4,7 @@ import dataset
 import logging
 from util import parse_timestamp
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("geofence.storage")
 log.setLevel(logging.DEBUG)
 
 db = dataset.connect("sqlite:///database.db")
