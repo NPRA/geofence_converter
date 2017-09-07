@@ -4,7 +4,7 @@ import requests
 from requests.exceptions import ConnectionError
 import logging
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("geofence.nvdb")
 
 
 def fetch_objects():
@@ -19,3 +19,4 @@ def fetch_objects():
     except ConnectionError as ce:
         log.exception(ce)
         return None
+

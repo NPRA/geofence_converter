@@ -98,7 +98,5 @@ class Datex2:
             lon = etree.SubElement(coord, "longitude")
             lon.text = str(p[1])
 
-
     def __str__(self):
         return etree.tostring(self.doc, pretty_print=True)
-
