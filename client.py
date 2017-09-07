@@ -5,64 +5,16 @@ from __future__ import print_function, unicode_literals
 import argparse
 import logging
 import sys
-import datetime
 import geofence
 import storage
 import time
-
-try:
-    from qpid.messaging import Connection, Message, MessagingError, Empty
-except ImportError:
-    print("Unable to find 'qpid' module. Do you have it in sys.path / PYTHONPATH?")
-    sys.exit(1)
+from interchange import NordicWayIC
 
 log = logging.getLogger("geofencebroker")
 log.setLevel(logging.DEBUG)
 
 ch = logging.StreamHandler(stream=sys.stdout)
 log.addHandler(ch)
-
-
-class NordicWaysIC:
-    def __init__(self, url, sender, receiver, username, password, options=None):
-        self.options = options if options else {}
-        self.url = url
-        self._queue_sender = sender
-        self._queue_receiver = receiver
-        self._credentials = {"username": username, "password": password}
-
-    def __enter__(self):
-        self.connect()
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.close()
-
-    def connect(self):
-        self.connection = Connection(self.url,
-                                     username=self._credentials.get("username"),
-                                     password=self._credentials.get("password"),
-                                     **self.options)
-
-        self.connection.open()
-        self.session = self.connection.session()
-
-        self.sender = self.session.sender(self._queue_sender)
-        self.receiver = self.session.receiver(self._queue_receiver)
-
-    def send_messsage(self, msg):
-        self.sender.send(msg)
-        self.sender.check_error()
-        print("Sent msg: {}".format(msg))
-
-    def close(self):
-        self.connection.close()
-
-    def __repr__(self):
-        return "<{} url={}, sender={}, receiver={}, options={}>".format(
-            self.__class__.__name__, self.url,
-            self._queue_sender, self._queue_receiver, self.options)
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -93,11 +45,11 @@ if __name__ == '__main__':
             log.error("Broker URL uses TLS/SSL. Therefore you need to specify SSL cert and key.")
             sys.exit(1)
 
-    ic = NordicWaysIC(args.broker_url, args.sender, args.receiver,
+    ic = NordicWayIC(args.broker_url, args.sender, args.receiver,
                       args.username, args.password, options)
     log.debug(ic)
-
     ic.connect()
+
     if not ic.connection.opened():
         log.error("Unable to connect!")
         sys.exit(1)
@@ -108,7 +60,6 @@ if __name__ == '__main__':
         if not fences:
             log.debug("No geofence objects..")
             time.sleep(5)
-
 
         # TODO: Check if returned JSON has paging. If so, fetch the rest of
         #       the geofence objects
