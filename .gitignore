@@ -7,3 +7,6 @@ database.db
 
 # directory with 3rd party libs
 libs
+
+# private config file
+config.yml
