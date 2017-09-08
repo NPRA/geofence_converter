@@ -1,0 +1,11 @@
+version: '2'
+ 
+services:
+  geofence:
+    restart: always
+    build: .
+    #expose:
+    #  - "8000"
+    volumes:
+      - .:/code
+    command: python client.py --help
