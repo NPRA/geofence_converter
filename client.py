@@ -7,6 +7,7 @@ import logging
 import sys
 import geofence
 import storage
+import datex2
 import time
 from interchange import NordicWayIC
 
@@ -46,7 +47,7 @@ if __name__ == '__main__':
             sys.exit(1)
 
     ic = NordicWayIC(args.broker_url, args.sender, args.receiver,
-                      args.username, args.password, options)
+                     args.username, args.password, options)
     log.debug(ic)
     ic.connect()
 
@@ -57,25 +58,31 @@ if __name__ == '__main__':
     # Main loop
     while True:
         fences = geofence.fetch_objects()
-        if not fences:
+        if not fences or fences.get("returnert", 0) == 0:
             log.debug("No geofence objects..")
-            time.sleep(5)
 
         # TODO: Check if returned JSON has paging. If so, fetch the rest of
         #       the geofence objects
         for fence in fences.get("objekter"):
+            log.debug("fence: {}".format(fence))
             if not storage.exists(fence):
                 # New object
-                storage.add(fence)
                 log.info("New object - schedule event to NordicWayIC with new datex2 doc")
+                datex_obj = datex2.create_doc(fence)
+                storage.add(fence)
+                ic.send_obj(datex_obj)
             else:
                 if storage.is_modified(fence):
                     storage.update(geofence)
                     log.info("SCHEDULE A NEW EVENT TO NordicWayIC WITH NEW DATEX2 document!")
+                    datex_obj = datex2.create_doc(fence)
+                    ic.send_obj(datex_obj)
                 else:
                     log.debug("geofence is already in db and has not been updated. Do nothing!")
+        else:
+            log.debug("Missing 'objekter' in vegobjekter from NVDB: {}".format(fences))
 
-        log.debug("Done. Sleep until next check.")
+        log.debug(".")
         time.sleep(5)
 
     ic.close()
