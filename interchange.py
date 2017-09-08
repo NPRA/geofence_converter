@@ -4,13 +4,11 @@ import sys
 import logging
 import util
 
-log = logging.getLogger("geofence.interchange")
-log.setLevel(logging.DEBUG)
 
 try:
     from qpid.messaging import Connection, Message, MessagingError, Empty
 except ImportError as ie:
-    log.exception("Unable to find 'qpid' module. Do you have it in sys.path / PYTHONPATH?")
+    logging.exception("Unable to find 'qpid' module. Do you have it in sys.path / PYTHONPATH?")
     sys.exit(1)
 
 
@@ -21,6 +19,7 @@ class NordicWayIC:
         self._queue_sender = sender
         self._queue_receiver = receiver
         self._credentials = {"username": username, "password": password}
+        self.log = logging.getLogger("geofencebroker")
 
     def __enter__(self):
         self.connect()

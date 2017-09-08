@@ -4,9 +4,6 @@ import dataset
 import logging
 from util import parse_timestamp
 
-log = logging.getLogger("geofence.storage")
-log.setLevel(logging.DEBUG)
-
 db = dataset.connect("sqlite:///database.db")
 
 
@@ -34,6 +31,8 @@ def convert_to_geofence(vegobjekt):
     """
     'datatype' == 19 -> GeomFlate, ref NVDB api explanation for vegobjekter
     """
+    log = logging.getLogger("geofencebroker")
+
     tmp = [x for x in vegobjekt.get("egenskaper") if x["datatype"] == 19]
     if not tmp:
         log.error("Unable to find GeomFlate from vebobjekt. Something is wrong! {}".format(tmp))
@@ -66,6 +65,7 @@ def convert_to_geofence(vegobjekt):
 
 def is_modified(vegobjekt):
     # import pdb; pdb.set_trace()
+    log = logging.getLogger("geofencebroker")
     next_date = parse_timestamp(vegobjekt["metadata"]["sist_modifisert"])
 
     table_vegobjekter = db.get_table("vegobjekter")

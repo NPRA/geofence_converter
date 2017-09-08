@@ -7,10 +7,9 @@ import math
 import logging
 import six
 
-log = logging.getLogger("geofence.nvdb")
-
 
 def fetch_objects():
+    log = logging.getLogger("geofencebroker")
     try:
         url = "https://www.utv.vegvesen.no/nvdb/api/v2/vegobjekter/911?segmentering=true&inkluder=lokasjon,egenskaper,metadata&kartutsnitt=-621912,6250000,1821912,8189887"
         req = requests.get(url)
@@ -56,7 +55,8 @@ def get_polygon_centroid(polygon_input):
     """
     ref https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon    
     """
-    
+    log = logging.getLogger("geofencebroker")
+
     # Convert the 2D list of string UTM coordinates
     # to proper float numbers. Need for the calculation
     # of the polygon centroid.
