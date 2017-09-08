@@ -2,6 +2,7 @@
 
 import sys
 import logging
+import util
 
 log = logging.getLogger("geofence.interchange")
 log.setLevel(logging.DEBUG)
@@ -46,6 +47,42 @@ class NordicWayIC:
             self.sender.check_error()
         except MessagingError:
             log.exception("Error sending message!")
+
+    def send_obj(self, datex_obj):
+        """
+        prop = {
+    #     "who": "Norwegian Public Roads Administration",
+    #     "how": "Datex2",
+    #     "what": "Conditions",
+    #     "lat": 63.0,
+    #     "lon": 10.01,
+    #     "where1": "no",
+    #     "when": str(datetime.datetime.now())
+    # }
+    # m = Message(user_id=args.username, properties=prop, content="Testing testing testing")
+        """
+
+        centroid = util.utm_to_gps(datex_obj.centroid)
+
+
+        prop = {
+            "who": "Norwegian Public Roads Administration",
+            "how": "Datex2",
+            "what": "Conditions",
+            "lat": centroid[0],
+            "lon": centroid[1],
+            "where1": "no",
+            "when": str(datetime.datetime.now())
+        }
+
+        m = Message(user_id=self._credentials.get("username"),
+                    properties=prop,
+                    content=str(datex_obj))
+
+        print("Sending message: {}".format(m))
+        print("Datex2 XML: {}".format(str(datex_obj)))
+
+        self.send_messsage(m)
 
     def close(self):
         self.connection.close()
