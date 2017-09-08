@@ -3,3 +3,4 @@ ProdConTLS.java
 *.pyc
 jndi.properties
 venv
+database.db
