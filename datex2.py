@@ -4,25 +4,31 @@ from lxml import etree
 import io
 import datetime
 import pytz
+import utm
+import logging
+import geofence
+import util
+
+log = logging.getLogger("geofence.datex2")
+log.setLevel(logging.DEBUG)
 
 
-def create_datex_xml(geofence):
-    vegobjekter = etree.Element("vegobjekter")
-    xml_doc = etree.ElementTree(vegobjekter)
+def create_doc(vegobjekt):
+    doc = Datex2()
 
-    #####
-    vegobjekt1 = etree.SubElement(vegobjekter, "vegobjekt")
-    vegobjekt1.attr["id"] = 1
-    vegobjekt1.attr["location"] = "Trondheim"
+    name = geofence.get_name(vegobjekt)
+    nvdb_id = vegobjekt["id"]
+    unix_epoch = geofence.get_unix_epoch(vegobjekt)
+    polygon = geofence.get_polygon(vegobjekt)
 
+    polygon = [[float(j) for j in i] for i in polygon]
 
-    vegobjekt2 = etree.SubElement(vegobjekter, "vegobjekt")
-    vegobjekt2.attr["id"] = 2
-    vegobjekt2.attr["location"] = "Åfjord"
+    doc.body(name, nvdb_id, unix_epoch, polygon)
 
-    # For debug
-    print(etree.tostring(xml_doc, pretty_print=True))
-    return xml_doc
+    log.debug("Creating new Datex2 document: name={}, nvdb_id={}, unix_epoch={}".format(
+        name, nvdb_id, unix_epoch))
+    log.debug("Datex2 object: {}".format(doc))
+    return doc
 
 
 class Datex2:
@@ -57,8 +63,20 @@ class Datex2:
         # Add meta information
         self._locationContainer(name, nvdb_id, unix_epoch)
 
+        # Temporary storing of polygon
+        gps_coords_poly = [util.utm_to_gps(i) for i in polygon]
+
         # Add GPS coordinates to XML document
-        self._locationArea(polygon)
+        self._locationArea(gps_coords_poly)
+        self.polygon = gps_coords_poly
+
+        print("polygon: {}".format(polygon))
+        print("gps coords: {}".format(gps_coords_poly))
+
+        # Calculate centroid of the polygon
+        self.centroid = geofence.get_polygon_centroid(polygon)
+        print("Datex2 centroid: {}".format(self.centroid))
+        self.centroid = util.utm_to_gps(self.centroid)
 
     def _locationContainer(self, name, nvdb_id, unix_epoch):
         """
@@ -66,8 +84,8 @@ class Datex2:
         """
         predefinedLocationCont = etree.SubElement(self.root, "predefinedLocationContainer",
                                                   attrib={
-                                                      "id": nvdb_id,
-                                                      "version": str(unix_epoch)
+                                                      "id": unicode(nvdb_id),
+                                                      "version": unicode(unix_epoch)
                                                   })
         predefinedLocationCont.set(self._qname, "PredefinedLocation")
         predefLocContName = etree.SubElement(predefinedLocationCont, "predefinedLocationName")
