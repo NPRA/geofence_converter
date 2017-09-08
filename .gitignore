@@ -4,3 +4,6 @@ ProdConTLS.java
 jndi.properties
 venv
 database.db
+
+# directory with 3rd party libs
+libs
