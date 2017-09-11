@@ -30,7 +30,7 @@ if __name__ == '__main__':
     parser.add_argument("-c", "--ssl-certfile", help="SSL cert file")
     parser.add_argument("-u", "--username", help="Username", default=None)
     parser.add_argument("-p", "--password", help="Password", default=None)
-    parser.add_argument("-t", "--timeout",
+    parser.add_argument("-t", "--timeout", type=int,
                         help="Timeout in seconds before checking NVDB for geofence updates", default=300)
     parser.add_argument("-volvotest", help="""Flag to use a test geofence Polygon in sweden
         instead of using the returned data from NVDB. ONLY FOR DEBUGGING.""", default=False)
@@ -62,6 +62,12 @@ if __name__ == '__main__':
             log.error("Missing required parameters!")
         sys.exit(1)
 
+    if args.verbose:
+        cfg.update({"verbose": True})
+
+    if not cfg.get("timeout"):
+        cfg.update({"timeout": args.timeout})
+
     if cfg.get("verbose", False):
         log.setLevel(logging.DEBUG)
 
@@ -77,6 +83,9 @@ if __name__ == '__main__':
         if not all([cfg.get("ssl_keyfile"), cfg.get("ssl_certfile")]):
             log.error("Broker URL uses TLS/SSL. Therefore you need to specify SSL cert and key.")
             sys.exit(1)
+
+    # if cfg.get("timeout", False):
+    #     options.update({})
 
     ic = NordicWayIC(cfg.get("broker_url"),
                      cfg.get("sender"),
@@ -100,7 +109,9 @@ if __name__ == '__main__':
         with open(filename, "r") as f:
             volvotest_polygon = f.read()
             print("Volvotest polygon: {}".format(volvotest_polygon))
-            print("Type: {}".format(type(volvotest_polygon)))
+
+    sleep_time = cfg.get("timeout")
+    log.debug("Sleeping for {} seconds between each check.".format(sleep_time))
 
     # Main loop
     while True:
@@ -120,7 +131,7 @@ if __name__ == '__main__':
                 "egenskaper": [
                     {
                         "datatype": 19,
-                        "verdi": ""+volvotest_polygon
+                        "verdi": volvotest_polygon
                     }
                 ]
             }
@@ -131,10 +142,8 @@ if __name__ == '__main__':
                 }
             }
 
-        print("fences: {}".format(fences))
         if not fences or fences["metadata"].get("returnert", 0) == 0:
-            log.debug("No geofence objects..")
-            time.sleep(5)
+            time.sleep(sleep_time)
             continue
 
         # TODO: Check if returned JSON has paging. If so, fetch the rest of
@@ -158,32 +167,7 @@ if __name__ == '__main__':
         else:
             log.debug("Missing 'objekter' in vegobjekter from NVDB: {}".format(fences))
 
-        log.debug(".")
-        time.sleep(5)
-
+        time.sleep(sleep_time)
     ic.close()
 
-    # prop = {
-    #     "who": "Norwegian Public Roads Administration",
-    #     "how": "Datex2",
-    #     "what": "Conditions",
-    #     "lat": 63.0,
-    #     "lon": 10.01,
-    #     "where1": "no",
-    #     "when": str(datetime.datetime.now())
-    # }
-    # m = Message(user_id=args.username, properties=prop, content="Testing testing testing")
-
-    # try:
-    #     ic.send_messsage(m)
-    # except MessagingError as me:
-    #     print("Unable to send message: {}".format(m))
-    #     print("Error: {}".format(me))
-
-    # try:
-    #     incoming = ic.receiver.fetch(timeout=15.0)
-    #     print("Got message: {}".format(incoming))
-    # except Empty:
-    #     print("Didn't receive any messages...")
-
-    # ic.session.acknowledge()
+    log.info("Shutdown.. See ya!")
