@@ -2,8 +2,7 @@
 
 import sys
 import logging
-import util
-
+import datetime
 
 try:
     from qpid.messaging import Connection, Message, MessagingError, Empty
@@ -60,10 +59,7 @@ class NordicWayIC:
     # }
     # m = Message(user_id=args.username, properties=prop, content="Testing testing testing")
         """
-
-        centroid = util.utm_to_gps(datex_obj.centroid)
-
-
+        centroid = datex_obj.centroid
         prop = {
             "who": "Norwegian Public Roads Administration",
             "how": "Datex2",
