@@ -43,15 +43,6 @@ def convert_to_geofence(vegobjekt):
         log.error("Missing POLYGON in 'verdi' key! {}".format(geomFlate))
         return None
 
-    # Convert all polygon coordinates to a proper list of UTM coordinates
-    # polygon_coords = geomFlate.get("verdi").replace("POLYGON ((", "")
-    # polygon_coords = polygon_coords.replace("))", "")
-    # polygon_coords = polygon_coords.split(",")
-    # coords = [x.strip().split(" ") for x in polygon_coords]
-    # for i, c in enumerate(coords):
-    #     coords[i][0] = float(c[0])
-    #     coords[i][1] = float(c[1])
-
     geofence = {
         "id": vegobjekt["id"],
         "href": vegobjekt["href"],
@@ -77,7 +68,7 @@ def is_modified(vegobjekt):
     prev_date = parse_timestamp(geofence["sist_modifisert"])
 
     if next_date > prev_date:
-        # 'vegobjekt' har blitt modifisert
+        # 'vegobjekt' has been modified
         return True
     elif next_date < prev_date:
         log.warn("next_date < prev_data: (%s < %s)" % (next_date, prev_date))
@@ -87,6 +78,5 @@ def is_modified(vegobjekt):
 
 def update(vegobjekt):
     table_vegobjekter = db.get_table("vegobjekter")
-
     geofence = convert_to_geofence(vegobjekt)
-    table_vegobjekter.update(vegobjekt, ['id'])
+    table_vegobjekter.update(geofence, ['id'])
