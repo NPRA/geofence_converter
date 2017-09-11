@@ -164,8 +164,8 @@ if __name__ == '__main__':
                     ic.send_obj(datex_obj)
                 else:
                     log.debug("geofence is already in db and has not been updated. Do nothing!")
-        else:
-            log.debug("Missing 'objekter' in vegobjekter from NVDB: {}".format(fences))
+        #else:
+        #    log.debug("Missing 'objekter' in vegobjekter from NVDB: {}".format(fences))
 
         time.sleep(sleep_time)
     ic.close()
