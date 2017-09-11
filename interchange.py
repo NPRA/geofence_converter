@@ -44,20 +44,12 @@ class NordicWayIC:
             self.sender.send(msg)
             self.sender.check_error()
         except MessagingError:
-            log.exception("Error sending message!")
+            self.log.exception("Error sending message!")
 
     def send_obj(self, datex_obj):
         """
-        prop = {
-    #     "who": "Norwegian Public Roads Administration",
-    #     "how": "Datex2",
-    #     "what": "Conditions",
-    #     "lat": 63.0,
-    #     "lon": 10.01,
-    #     "where1": "no",
-    #     "when": str(datetime.datetime.now())
-    # }
-    # m = Message(user_id=args.username, properties=prop, content="Testing testing testing")
+        Use data from the 'datex2' object to construct a proper
+        AMQP object with all the required properties set.
         """
         centroid = datex_obj.centroid
         prop = {
@@ -74,8 +66,8 @@ class NordicWayIC:
                     properties=prop,
                     content=str(datex_obj))
 
-        print("Sending message: {}".format(m))
-        print("Datex2 XML: {}".format(str(datex_obj)))
+        self.log.debug("Sending message: {}".format(m))
+        self.log.debug("Datex2 XML: {}".format(str(datex_obj)))
 
         self.send_messsage(m)
 
