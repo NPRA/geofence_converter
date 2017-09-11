@@ -17,6 +17,9 @@ log = logging.getLogger("geofencebroker")
 log.setLevel(logging.INFO)
 
 ch = logging.StreamHandler(stream=sys.stdout)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+
 log.addHandler(ch)
 
 if __name__ == '__main__':
