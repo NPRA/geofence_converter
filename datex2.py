@@ -4,7 +4,6 @@ from lxml import etree
 import io
 import datetime
 import pytz
-import utm
 import logging
 import geofence
 import util
@@ -70,12 +69,12 @@ class Datex2:
         self._locationArea(gps_coords_poly)
         self.polygon = gps_coords_poly
 
-        print("polygon: {}".format(polygon))
-        print("gps coords: {}".format(gps_coords_poly))
+        log.debug("polygon: {}".format(polygon))
+        log.debug("gps coords: {}".format(gps_coords_poly))
 
         # Calculate centroid of the polygon
         self.centroid = geofence.get_polygon_centroid(polygon)
-        print("Datex2 centroid: {}".format(self.centroid))
+        log.debug("Datex2 centroid: {}".format(self.centroid))
         self.centroid = util.utm_to_gps(self.centroid)
 
     def _locationContainer(self, name, nvdb_id, unix_epoch):
