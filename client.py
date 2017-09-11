@@ -14,7 +14,7 @@ import time
 from interchange import NordicWayIC
 
 log = logging.getLogger("geofencebroker")
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 ch = logging.StreamHandler(stream=sys.stdout)
 log.addHandler(ch)
@@ -30,15 +30,16 @@ if __name__ == '__main__':
     parser.add_argument("-c", "--ssl-certfile", help="SSL cert file")
     parser.add_argument("-u", "--username", help="Username", default=None)
     parser.add_argument("-p", "--password", help="Password", default=None)
-
+    parser.add_argument("-t", "--timeout",
+                        help="Timeout in seconds before checking NVDB for geofence updates", default=300)
 
     args = parser.parse_args()
     cfg = {}
 
     if args.config:
-        print("Using config file")
+        log.info("Using config file")
         if not os.path.exists(args.config):
-            print("Config file was not found..")
+            log.error("Config file was not found..")
             sys.exit(1)
         with open(args.config, 'r') as f:
             cfg = yaml.load(f)
@@ -54,13 +55,11 @@ if __name__ == '__main__':
 
         required_parms = []
         map(required_parms.append, [args.broker_url, args.sender, args.receiver])
-        print("required_parms: {}".format(required_parms))
+        log.debug("required_parms: {}".format(required_parms))
 
         if not all(required_parms):
-            print("Missing required parameters!")
+            log.error("Missing required parameters!")
         sys.exit(1)
-
-        import pdb; pdb.set_trace()
 
     if cfg.get("verbose", False):
         log.setLevel(logging.DEBUG)
@@ -71,7 +70,6 @@ if __name__ == '__main__':
 
     if cfg.get("ssl_certfile", False):
         options.update({"ssl_certfile": cfg.get("ssl_certfile")})
-    print("options: {}".format(options))
 
     if cfg.get("broker_url", "").startswith("amqps"):
         # Encrypted amqps session
