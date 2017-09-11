@@ -4,6 +4,7 @@ import dataset
 import logging
 from util import parse_timestamp
 
+# Initialize and connect to local sqlite database
 db = dataset.connect("sqlite:///database.db")
 
 
@@ -20,9 +21,7 @@ def exists(vegobjekt):
 
 
 def add(vegobjekt):
-    # import pdb; pdb.set_trace()
     table_vegobjekter = db.get_table("vegobjekter")
-
     geofence = convert_to_geofence(vegobjekt)
     table_vegobjekter.insert(geofence)
 
