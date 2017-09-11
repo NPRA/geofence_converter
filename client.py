@@ -32,6 +32,8 @@ if __name__ == '__main__':
     parser.add_argument("-p", "--password", help="Password", default=None)
     parser.add_argument("-t", "--timeout",
                         help="Timeout in seconds before checking NVDB for geofence updates", default=300)
+    parser.add_argument("-volvotest", help="""Flag to use a test geofence Polygon in sweden
+        instead of using the returned data from NVDB. ONLY FOR DEBUGGING.""", default=False)
 
     args = parser.parse_args()
     cfg = {}
@@ -52,7 +54,6 @@ if __name__ == '__main__':
             sys.exit(1)
 
     else:
-
         required_parms = []
         map(required_parms.append, [args.broker_url, args.sender, args.receiver])
         log.debug("required_parms: {}".format(required_parms))
@@ -90,10 +91,48 @@ if __name__ == '__main__':
         log.error("Unable to connect!")
         sys.exit(1)
 
+    if args.volvotest:
+        filename = "volvotest-polygon.txt"
+        if not os.path.exists(filename):
+            log.error("VOLVOTEST flag set. Can't find input polygon file: '{}'".format(filename))
+            sys.exit(1)
+
+        with open(filename, "r") as f:
+            volvotest_polygon = f.read()
+            print("Volvotest polygon: {}".format(volvotest_polygon))
+            print("Type: {}".format(type(volvotest_polygon)))
+
     # Main loop
     while True:
         fences = geofence.fetch_objects()
-        if not fences or fences.get("returnert", 0) == 0:
+
+        if args.volvotest:
+            log.debug("Using hardcoded test object for volvo testing")
+            volvoobj = {
+                "metadata": {
+                    "type": {
+                        "navn": "Volvo-Test-Name"
+                    },
+                    "sist_modifisert": "2017-09-08 09:33:44"
+                },
+                "id": 123456789,
+                "href": "https://www.vegvesen.no/not-a-valid-url",
+                "egenskaper": [
+                    {
+                        "datatype": 19,
+                        "verdi": ""+volvotest_polygon
+                    }
+                ]
+            }
+            fences = {
+                "objekter": [volvoobj],
+                "metadata": {
+                    "returnert": 1
+                }
+            }
+
+        print("fences: {}".format(fences))
+        if not fences or fences["metadata"].get("returnert", 0) == 0:
             log.debug("No geofence objects..")
             time.sleep(5)
             continue
