@@ -11,7 +11,7 @@ import six
 def fetch_objects():
     log = logging.getLogger("geofencebroker")
     try:
-        url = "https://www.vegvesen.no/nvdb/api/v2/vegobjekter/911?segmentering=true&inkluder=lokasjon,egenskaper,metadata&kartutsnitt=-621912,6250000,1821912,8189887"
+        url = "https://pm1.utv.vegvesen.no/nvdb/api/v2/vegobjekter/911?inkluder=lokasjon,egenskaper,metadata"
         req = requests.get(url)
 
         if not req.ok:
