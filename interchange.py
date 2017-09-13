@@ -70,8 +70,6 @@ class NordicWayIC:
                     content=str(datex_obj))
 
         self.log.debug("Sending message: {}".format(m))
-        self.log.debug("Datex2 XML: {}".format(str(datex_obj)))
-
         self.send_messsage(m)
 
     def close(self):
