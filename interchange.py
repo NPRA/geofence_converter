@@ -3,6 +3,7 @@
 import sys
 import logging
 import datetime
+import pytz
 
 try:
     from qpid.messaging import Connection, Message, MessagingError, Empty
@@ -51,6 +52,8 @@ class NordicWayIC:
         Use data from the 'datex2' object to construct a proper
         AMQP object with all the required properties set.
         """
+        tz = pytz.timezone("Europe/Oslo")
+        now_iso_timestamp = datetime.datetime.now(tz).isoformat()
         centroid = datex_obj.centroid
         prop = {
             "who": "Norwegian Public Roads Administration",
@@ -59,7 +62,7 @@ class NordicWayIC:
             "lat": centroid[0],
             "lon": centroid[1],
             "where1": "no",
-            "when": str(datetime.datetime.now())
+            "when": now_iso_timestamp
         }
 
         m = Message(user_id=self._credentials.get("username"),
