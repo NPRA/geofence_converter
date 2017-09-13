@@ -1,0 +1,53 @@
+<payloadPublication xsi:type="PredefinedLocationsPublication" lang="en">
+  <publicationTime>DATETIME.NOW().ISO8601</publicationTime>
+  
+  <publicationCreator>
+    <country>no</country>
+    <nationalIdentifier>Norwegian Public Roads Administration</nationalIdentifier>
+  </publicationCreator>
+
+  <headerInformation>
+    <confidentiality>noRestriction</confidentiality>
+    <informationStatus>real</informationStatus>
+  </headerInformation>
+
+  <predefinedLocationContainer xsi:type="PredefinedLocation" id="ID-FRA-NVDB" version="UNIX epoch (10 chars)">
+    <predefinedLocationName>
+      <values>
+        <value>NAME-FELTET-FRA-NVDB</value>
+      </values>
+    </predefinedLocationName>
+
+    <location xsi:type="Area">
+      <areaExtension>
+        <openlrExtendedArea>
+          <openlrAreaLocationReference xsi:type="OpenlrPolygonLocationReference">
+            <openlrPolygonCorners>
+              <openlrCoordinate>
+                <latitude>12.11</latitude>
+                <longitude>23.1</longitude>
+              </openlrCoordinate>
+              <openlrCoordinate>
+                <latitude>12.15</latitude>
+                <longitude>23.12</longitude>
+              </openlrCoordinate>
+              <openlrCoordinate>
+                <latitude>12.35</latitude>
+                <longitude>23.87</longitude>
+              </openlrCoordinate>
+              <openlrCoordinate>
+                <latitude>12.8</latitude>
+                <longitude>23.4</longitude>
+              </openlrCoordinate>
+              <openlrCoordinate>
+                <latitude>12.4</latitude>
+                <longitude>23.12</longitude>
+              </openlrCoordinate>
+            </openlrPolygonCorners>
+          </openlrAreaLocationReference>
+        </openlrExtendedArea>
+      </areaExtension>
+    </location>
+
+  </predefinedLocationContainer>
+</payloadPublication>
