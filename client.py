@@ -160,13 +160,19 @@ if __name__ == '__main__':
                 storage.add(fence)
                 ic.send_obj(datex_obj)
             else:
-                if storage.is_modified(fence):
-                    storage.update(geofence)
-                    log.info("SCHEDULE A NEW EVENT TO NordicWayIC WITH NEW DATEX2 document!")
+
+                if args.volvotest:
+                    log.debug("Volvotest mode - will continuously send geofence..")
                     datex_obj = datex2.create_doc(fence)
                     ic.send_obj(datex_obj)
                 else:
-                    log.debug("geofence is already in db and has not been updated. Do nothing!")
+                    if storage.is_modified(fence):
+                        storage.update(geofence)
+                        log.info("SCHEDULE A NEW EVENT TO NordicWayIC WITH NEW DATEX2 document!")
+                        datex_obj = datex2.create_doc(fence)
+                        ic.send_obj(datex_obj)
+                    else:
+                        log.debug("geofence is already in db and has not been updated. Do nothing!")
         #else:
         #    log.debug("Missing 'objekter' in vegobjekter from NVDB: {}".format(fences))
 
