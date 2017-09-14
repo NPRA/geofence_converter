@@ -118,7 +118,9 @@ if __name__ == '__main__':
 
     # Main loop
     while True:
-        fences = geofence.fetch_objects()
+        fences = {}
+        if not args.volvotest:
+            fences = geofence.fetch_objects()
 
         if args.volvotest:
             log.debug("Using hardcoded test object for volvo testing")
