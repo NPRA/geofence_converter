@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import requests
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, Timeout
 from util import parse_timestamp, datetime_to_unix_epoch
 import math
 import logging
@@ -11,14 +11,14 @@ import six
 def fetch_objects():
     log = logging.getLogger("geofencebroker")
     try:
-        url = "https://pm1.utv.vegvesen.no/nvdb/api/v2/vegobjekter/911?inkluder=lokasjon,egenskaper,metadata"
-        req = requests.get(url)
+        url = "https://www.vegvesen.no/nvdb/api/v2/vegobjekter/911?inkluder=lokasjon,egenskaper,metadata"
+        req = requests.get(url, timeout=2.0)
 
         if not req.ok:
             log.warn("Unable to retrieve NVDB goefence objects")
             return None
         return req.json()
-    except ConnectionError as ce:
+    except (ConnectionError, Timeout) as ce:
         log.exception(ce)
         return None
 
