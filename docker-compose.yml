@@ -8,4 +8,4 @@ services:
     #  - "8000"
     volumes:
       - .:/code
-    command: python client.py -conf config.yml
+    command: python client.py -conf config.yml -volvotest ./volvotest-polygon.txt
