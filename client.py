@@ -168,8 +168,8 @@ if __name__ == '__main__':
                     datex_obj = datex2.create_doc(fence)
                     ic.send_obj(datex_obj)
                 else:
-                    if storage.is_modified(fence):
-                        storage.update(geofence)
+                    if True or storage.is_modified(fence):
+                        storage.update(fence)
                         log.info("SCHEDULE A NEW EVENT TO NordicWayIC WITH NEW DATEX2 document!")
                         datex_obj = datex2.create_doc(fence)
                         ic.send_obj(datex_obj)
