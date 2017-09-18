@@ -58,7 +58,7 @@ class NordicWayIC:
         prop = {
             "who": "Norwegian Public Roads Administration",
             "how": "Datex2",
-            "what": "Conditions",
+            "what": "PredefinedLocation",
             "lat": centroid[0],
             "lon": centroid[1],
             "where1": "no",
