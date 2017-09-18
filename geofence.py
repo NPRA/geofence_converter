@@ -3,7 +3,6 @@
 import requests
 from requests.exceptions import ConnectionError, Timeout
 from util import parse_timestamp, datetime_to_unix_epoch
-import math
 import logging
 import six
 
