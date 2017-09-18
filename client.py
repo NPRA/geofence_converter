@@ -34,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument("-u", "--username", help="Username", default=None)
     parser.add_argument("-p", "--password", help="Password", default=None)
     parser.add_argument("-t", "--timeout", type=int,
-                        help="Timeout in seconds before checking NVDB for geofence updates", default=300)
+                        help="Timeout in seconds before checking NVDB for geofence updates", default=None)
     parser.add_argument("-volvotest", help="""Flag to use a test geofence Polygon in sweden
         instead of using the returned data from NVDB. ONLY FOR DEBUGGING.""", default=False)
 
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     if args.verbose:
         cfg.update({"verbose": True})
 
-    if not cfg.get("timeout"):
+    if args.timeout:
         cfg.update({"timeout": args.timeout})
 
     if cfg.get("verbose", False):
