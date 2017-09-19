@@ -33,12 +33,20 @@ def create_doc(vegobjekt):
 class Datex2:
     def __init__(self):
         self._file = io.StringIO()
+        
+        self.top_root = etree.Element("d2LogicalModel",
+                                      attrib={"modelBaseVersion": "2"},
+                                      nsmap={None: "http://datex2.eu/schema/2/2_0"})
+        self.doc = etree.ElementTree(self.top_root)
 
+        exchange = etree.SubElement(self.top_root, "exchange")
+        supplierId = etree.SubElement(exchange, "supplierIdentification")
+        etree.SubElement(supplierId, "country").text = "no"
+        etree.SubElement(supplierId, "nationalIdentifier").text = "Norwegian Public Roads Administration"
+
+        self.root = etree.SubElement(self.top_root, "payloadPublication", attrib={"lang": "en"})
         self._qname = etree.QName("http://www.w3.org/2001/XMLSchema-instance", "type")
-
-        self.root = etree.Element("payloadPublication", attrib={"lang": "en"})
         self.root.set(self._qname, "PredefinedLocationsPublication")
-        self.doc = etree.ElementTree(self.root)
 
         self._header()
 
