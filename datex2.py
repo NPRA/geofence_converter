@@ -67,14 +67,13 @@ class Datex2:
         etree.SubElement(headerInformation, "informationStatus").text = "real"
 
     def body(self, name, nvdb_id, unix_epoch, polygon):
-        # Add meta information
-        self._locationContainer(name, nvdb_id, unix_epoch)
-
         # Temporary storing of polygon
         gps_coords_poly = [util.utm_to_gps(i) for i in polygon]
+        
+        # Add meta information
+        self._locationContainer(name, nvdb_id, unix_epoch, gps_coords_poly)
 
-        # Add GPS coordinates to XML document
-        self._locationArea(gps_coords_poly)
+
         self.polygon = gps_coords_poly
 
         log.debug("polygon: {}".format(polygon))
@@ -85,7 +84,7 @@ class Datex2:
         log.debug("Datex2 centroid: {}".format(self.centroid))
         self.centroid = util.utm_to_gps(self.centroid)
 
-    def _locationContainer(self, name, nvdb_id, unix_epoch):
+    def _locationContainer(self, name, nvdb_id, unix_epoch, polygon):
         """
         Adds the <predefinedLocationContainer> XML tag block
         """
@@ -99,12 +98,14 @@ class Datex2:
         locationBlockValues = etree.SubElement(predefLocContName, "values")
         etree.SubElement(locationBlockValues, "value").text = name
 
-    def _locationArea(self, polygon):
+        self._locationArea(predefinedLocationCont, polygon)
+
+    def _locationArea(self, parent, polygon):
         """
         Constructs the polygon XML definitions based on the geofence Polygon
         coordinates from NVDB.
         """
-        loc = etree.SubElement(self.root, "location")
+        loc = etree.SubElement(parent, "location")
         loc.set(self._qname, "Area")
 
         areaExt = etree.SubElement(loc, "areaExtension")
