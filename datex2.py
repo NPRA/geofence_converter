@@ -33,7 +33,7 @@ def create_doc(vegobjekt):
 class Datex2:
     def __init__(self):
         self._file = io.StringIO()
-        
+
         self.top_root = etree.Element("d2LogicalModel",
                                       attrib={"modelBaseVersion": "2"},
                                       nsmap={None: "http://datex2.eu/schema/2/2_0"})
@@ -118,7 +118,7 @@ class Datex2:
 
         for p in polygon:
             # Assume 'p' is a tuple of (lat,lon) coord
-            coord = etree.SubElement(openrlPolygonCorners, "openrlCoordinate")
+            coord = etree.SubElement(openrlPolygonCorners, "openlrCoordinate")
             lat = etree.SubElement(coord, "latitude")
             lat.text = str(p[0])
             lon = etree.SubElement(coord, "longitude")
