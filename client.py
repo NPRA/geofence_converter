@@ -87,8 +87,8 @@ if __name__ == '__main__':
             log.error("Broker URL uses TLS/SSL. Therefore you need to specify SSL cert and key.")
             sys.exit(1)
 
-    # if cfg.get("timeout", False):
-    #     options.update({})
+    log.info("Connecting to {broker_url}".format(**cfg))
+    log.info(" sender: {sender}, receiver: {receiver}".format(**cfg))
 
     ic = NordicWayIC(cfg.get("broker_url"),
                      cfg.get("sender"),
