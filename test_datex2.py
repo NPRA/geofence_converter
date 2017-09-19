@@ -39,4 +39,3 @@ class TestDatex2(TestCase):
         
 
         self.assertTrue(d.doc.findall("payloadPublication"))
-        self.assertTrue(d.doc.findall("location"))
