@@ -45,3 +45,21 @@ $ python -conf ./config.yml
 ## Technology?
 
 Python ofcourse ;)
+
+
+## Build and start docker container
+
+1. First create your config file: `config.yml`
+2. Then build the docker container
+```bash
+$ sudo docker-compose build
+```
+3. Start the container (in background - if not, skip the '-d')
+```bash
+$ sudo docker-compose up -d
+```
+4. Inspect the logs by running
+```bash
+$ sudo docker-compose logs
+```
+
