@@ -14,6 +14,34 @@ for further processing.
 Simple, yeah?
 
 
+## Example
+
+**Help:**
+```bash
+$ python client.py --help
+```
+
+**configuration file:**
+```yaml
+$ cat config.yml
+ # config file
+broker_url: amqps://url.to.my.amqp.server.com:5671
+sender: send_queue
+receiver: recv_queue
+ssl_keyfile: certs/my_priv.key
+ssl_certfile: certs/my_crt.cert
+username: user1
+password: VerySecret
+verbose: true
+# Timeout in seconds. How often to check for new geofences from NVDB
+timeout: 300
+```
+
+**Run with config file:**
+```bash
+$ python -conf ./config.yml
+```
+
 ## Technology?
 
 Python ofcourse ;)
