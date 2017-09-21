@@ -28,8 +28,11 @@ def get_polygon(vegobjekt):
     extract the POLYGON datatype and convert it a 2-dimensional
     list of UTM coordinates.
     """
+    log = logging.getLogger("geofencebroker")
     tmp = [x for x in vegobjekt["egenskaper"] if x["datatype"] == 19]
     if not tmp:
+        log.error("Unable to get POLYGON from vegobjekt!\n\tvegobjekt['egenskaper'] = {}".format(
+            vegobjekt["egenskaper"]))
         return []
 
     tmp = tmp[0]
