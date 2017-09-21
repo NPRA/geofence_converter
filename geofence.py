@@ -51,7 +51,7 @@ def get_name(vegobjekt):
     name = filter(lambda x: x['id'] == 11212, vegobjekt["egenskaper"])
     description = filter(lambda x: x['id'] == 11213, vegobjekt["egenskaper"])
 
-    return "{} ({})".format(name[0], description[0])
+    return "{} ({})".format(name[0]["verdi"], description[0]["verdi"])
 
 
 def get_version(vegobjekt):
