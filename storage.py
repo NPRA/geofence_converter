@@ -43,7 +43,7 @@ def convert_to_geofence(vegobjekt):
         log.error("Missing POLYGON in 'verdi' key! {}".format(geomFlate))
         return None
 
-    geofence = {
+    geofence_obj = {
         "id": vegobjekt["id"],
         "href": vegobjekt["href"],
         "sist_modifisert": vegobjekt["metadata"]["sist_modifisert"],
@@ -52,7 +52,7 @@ def convert_to_geofence(vegobjekt):
         "polygon": geomFlate.get("verdi")
     }
 
-    return geofence
+    return geofence_obj
 
 
 def is_modified(vegobjekt):
