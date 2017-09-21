@@ -43,7 +43,15 @@ def get_polygon(vegobjekt):
 
 
 def get_name(vegobjekt):
-    return vegobjekt["metadata"]["type"]["navn"]
+    """Return the navn (id=11212) and beskrivelse (id=11213)
+    navn = "Oslo Ring 1"
+    beskrivelse = "Tester ring 1"
+    <- "Oslo Ring 1 (Tester ring 1)"
+    """
+    name = filter(lambda x: x['id'] == 11212, vegobjekt["egenskaper"])
+    description = filter(lambda x: x['id'] == 11213, vegobjekt["egenskaper"])
+
+    return "{} ({})".format(name[0], description[0])
 
 
 def get_version(vegobjekt):
