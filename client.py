@@ -154,7 +154,7 @@ if __name__ == '__main__':
         # TODO: Check if returned JSON has paging. If so, fetch the rest of
         #       the geofence objects
         for fence in fences.get("objekter"):
-            log.debug("fence: {}".format(fence))
+            # log.debug("fence: {}".format(fence))
             if not storage.exists(fence):
                 # New object
                 log.info("New object - schedule event to NordicWayIC with new datex2 doc")
