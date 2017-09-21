@@ -8,7 +8,7 @@ import logging
 import geofence
 import util
 
-log = logging.getLogger("geofence.datex2")
+log = logging.getLogger("geofencebroker")
 log.setLevel(logging.DEBUG)
 
 
@@ -26,7 +26,7 @@ def create_doc(vegobjekt):
 
     log.debug("Creating new Datex2 document: name={}, nvdb_id={}, version={}".format(
         name, nvdb_id, version))
-    log.debug("Datex2 object: {}".format(doc))
+    # log.debug("Datex2 object: {}".format(doc))
     return doc
 
 
