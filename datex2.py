@@ -17,15 +17,15 @@ def create_doc(vegobjekt):
 
     name = geofence.get_name(vegobjekt)
     nvdb_id = vegobjekt["id"]
-    unix_epoch = geofence.get_unix_epoch(vegobjekt)
+    version = geofence.get_version(vegobjekt)
     polygon = geofence.get_polygon(vegobjekt)
 
     polygon = [[float(j) for j in i] for i in polygon]
 
-    doc.body(name, nvdb_id, unix_epoch, polygon)
+    doc.body(name, nvdb_id, version, polygon)
 
-    log.debug("Creating new Datex2 document: name={}, nvdb_id={}, unix_epoch={}".format(
-        name, nvdb_id, unix_epoch))
+    log.debug("Creating new Datex2 document: name={}, nvdb_id={}, version={}".format(
+        name, nvdb_id, version))
     log.debug("Datex2 object: {}".format(doc))
     return doc
 
@@ -66,12 +66,12 @@ class Datex2:
         etree.SubElement(headerInformation, "confidentiality").text = "noRestriction"
         etree.SubElement(headerInformation, "informationStatus").text = "real"
 
-    def body(self, name, nvdb_id, unix_epoch, polygon):
+    def body(self, name, nvdb_id, version, polygon):
         # Temporary storing of polygon
         gps_coords_poly = [util.utm_to_gps(i) for i in polygon]
         
         # Add meta information
-        self._locationContainer(name, nvdb_id, unix_epoch, gps_coords_poly)
+        self._locationContainer(name, nvdb_id, version, gps_coords_poly)
 
 
         self.polygon = gps_coords_poly
@@ -84,14 +84,14 @@ class Datex2:
         log.debug("Datex2 centroid: {}".format(self.centroid))
         self.centroid = util.utm_to_gps(self.centroid)
 
-    def _locationContainer(self, name, nvdb_id, unix_epoch, polygon):
+    def _locationContainer(self, name, nvdb_id, version, polygon):
         """
         Adds the <predefinedLocationContainer> XML tag block
         """
         predefinedLocationCont = etree.SubElement(self.root, "predefinedLocationContainer",
                                                   attrib={
                                                       "id": unicode(nvdb_id),
-                                                      "version": unicode(unix_epoch)
+                                                      "version": unicode(version)
                                                   })
         predefinedLocationCont.set(self._qname, "PredefinedLocation")
         predefLocContName = etree.SubElement(predefinedLocationCont, "predefinedLocationName")

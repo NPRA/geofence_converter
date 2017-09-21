@@ -3,6 +3,7 @@
 import dataset
 import logging
 from util import parse_timestamp
+import geofence
 
 # Initialize and connect to local sqlite database
 db = dataset.connect("sqlite:///database.db")
@@ -46,6 +47,7 @@ def convert_to_geofence(vegobjekt):
         "id": vegobjekt["id"],
         "href": vegobjekt["href"],
         "sist_modifisert": vegobjekt["metadata"]["sist_modifisert"],
+        "version": geofence.get_version(vegobjekt),
         "type": vegobjekt["metadata"]["type"]["navn"],
         "polygon": geomFlate.get("verdi")
     }

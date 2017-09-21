@@ -43,11 +43,17 @@ def get_name(vegobjekt):
     return vegobjekt["metadata"]["type"]["navn"]
 
 
-def get_unix_epoch(vegobjekt):
-    timestamp = parse_timestamp(vegobjekt["metadata"]["sist_modifisert"])
-    unix_epoch = datetime_to_unix_epoch(timestamp)
+def get_version(vegobjekt):
+    """Version id field in NVDB has 'id' == 11214"""
 
-    return unix_epoch
+    # timestamp = parse_timestamp(vegobjekt["metadata"]["sist_modifisert"])
+    # unix_epoch = datetime_to_unix_epoch(timestamp)
+    version = filter(lambda x: x["id"] == 11214, vegobjekt["egenskaper"])
+    if not version:
+        return version
+
+    version = version[0]
+    return int(version['verdi'])
 
 
 def get_polygon_centroid(polygon_input):
