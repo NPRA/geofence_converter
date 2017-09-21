@@ -26,7 +26,6 @@ def create_doc(vegobjekt):
 
     log.debug("Creating new Datex2 document: name={}, nvdb_id={}, version={}".format(
         name, nvdb_id, version))
-    # log.debug("Datex2 object: {}".format(doc))
     return doc
 
 
@@ -83,6 +82,10 @@ class Datex2:
         self.centroid = geofence.get_polygon_centroid(polygon)
         log.debug("Datex2 centroid: {}".format(self.centroid))
         self.centroid = util.utm_to_gps(self.centroid)
+
+        self.name = name
+        self.nvdb_id = nvdb_id
+        self.version = version
 
     def _locationContainer(self, name, nvdb_id, version, polygon):
         """

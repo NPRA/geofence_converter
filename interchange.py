@@ -69,7 +69,8 @@ class NordicWayIC:
                     properties=prop,
                     content=str(datex_obj))
 
-        self.log.debug("Sending message: {}".format(m))
+        self.log.debug("Sending message: version={}, name={}".format(datex_obj.version, datex_obj.name))
+        
         self.send_messsage(m)
 
     def close(self):
