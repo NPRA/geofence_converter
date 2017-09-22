@@ -9,7 +9,6 @@ import geofence
 import util
 
 log = logging.getLogger("geofencebroker")
-log.setLevel(logging.DEBUG)
 
 
 def create_doc(vegobjekt):
