@@ -4,6 +4,7 @@
 from __future__ import print_function, unicode_literals
 import argparse
 import logging
+import coloredlogs
 import yaml
 import os
 import sys
@@ -14,13 +15,34 @@ import time
 from interchange import NordicWayIC
 
 log = logging.getLogger("geofencebroker")
-log.setLevel(logging.INFO)
 
-ch = logging.StreamHandler(stream=sys.stdout)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
 
-log.addHandler(ch)
+def init_logging(debug_env_var):
+
+    field_style_override = coloredlogs.DEFAULT_FIELD_STYLES
+    level_style_override = coloredlogs.DEFAULT_LEVEL_STYLES
+
+    logging_level = 'INFO'
+    log.setLevel(logging.INFO)
+
+    if os.environ.get(debug_env_var):
+        logging_level = 'DEBUG'
+        log.setLevel(logging.DEBUG)
+
+    field_style_override['levelname'] = {"color": "magenta", "bold": True}
+    level_style_override['debug'] = {"color": "blue"}
+
+    coloredlogs.install(level=logging_level,
+                        fmt="%(asctime)s %(name)s %(levelname)s %(message)s",
+                        level_styles=level_style_override,
+                        field_styles=field_style_override)
+
+    # ch = logging.StreamHandler(stream=sys.stdout)
+    # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # ch.setFormatter(formatter)
+
+    # log.addHandler(ch)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -35,11 +57,11 @@ if __name__ == '__main__':
     parser.add_argument("-p", "--password", help="Password", default=None)
     parser.add_argument("-t", "--timeout", type=int,
                         help="Timeout in seconds before checking NVDB for geofence updates", default=None)
-    parser.add_argument("-volvotest", help="""Flag to use a test geofence Polygon in sweden
-        instead of using the returned data from NVDB. ONLY FOR DEBUGGING.""", default=False)
 
     args = parser.parse_args()
     cfg = {}
+
+    init_logging('DEBUG')
 
     if args.config:
         log.info("Using config file")
@@ -71,9 +93,6 @@ if __name__ == '__main__':
     if args.timeout:
         cfg.update({"timeout": args.timeout})
 
-    if cfg.get("verbose", False):
-        log.setLevel(logging.DEBUG)
-
     options = {"ssl_skip_hostname_check": True}
     if cfg.get("ssl_keyfile", False):
         options.update({"ssl_keyfile": cfg.get("ssl_keyfile")})
@@ -103,49 +122,12 @@ if __name__ == '__main__':
         log.error("Unable to connect!")
         sys.exit(1)
 
-    if args.volvotest:
-        filename = "volvotest-polygon.txt"
-        if not os.path.exists(filename):
-            log.error("VOLVOTEST flag set. Can't find input polygon file: '{}'".format(filename))
-            sys.exit(1)
-
-        with open(filename, "r") as f:
-            volvotest_polygon = f.read()
-            print("Volvotest polygon: {}".format(volvotest_polygon))
-
     sleep_time = cfg.get("timeout")
     log.debug("Sleeping for {} seconds between each check.".format(sleep_time))
 
     # Main loop
     while True:
-        fences = {}
-        if not args.volvotest:
-            fences = geofence.fetch_objects()
-
-        if args.volvotest:
-            log.debug("Using hardcoded test object for volvo testing")
-            volvoobj = {
-                "metadata": {
-                    "type": {
-                        "navn": "Volvo-Test-Name"
-                    },
-                    "sist_modifisert": "2017-09-08 09:33:44"
-                },
-                "id": 123456789,
-                "href": "https://www.vegvesen.no/not-a-valid-url",
-                "egenskaper": [
-                    {
-                        "datatype": 19,
-                        "verdi": volvotest_polygon
-                    }
-                ]
-            }
-            fences = {
-                "objekter": [volvoobj],
-                "metadata": {
-                    "returnert": 1
-                }
-            }
+        fences = geofence.fetch_objects()
 
         if not fences or fences["metadata"].get("returnert", 0) == 0:
             time.sleep(sleep_time)
@@ -154,7 +136,6 @@ if __name__ == '__main__':
         # TODO: Check if returned JSON has paging. If so, fetch the rest of
         #       the geofence objects
         for fence in fences.get("objekter"):
-            # log.debug("fence: {}".format(fence))
             if not storage.exists(fence):
                 # New object
                 log.info("New object - schedule event to NordicWayIC with new datex2 doc")
@@ -162,21 +143,13 @@ if __name__ == '__main__':
                 storage.add(fence)
                 ic.send_obj(datex_obj)
             else:
-
-                if args.volvotest:
-                    log.debug("Volvotest mode - will continuously send geofence..")
+                if True or storage.is_modified(fence):
+                    storage.update(fence)
                     datex_obj = datex2.create_doc(fence)
+                    log.info("New event: message: version={}, name={}".format(datex_obj.version, datex_obj.name))
                     ic.send_obj(datex_obj)
                 else:
-                    if True or storage.is_modified(fence):
-                        storage.update(fence)
-                        log.info("SCHEDULE A NEW EVENT TO NordicWayIC WITH NEW DATEX2 document!")
-                        datex_obj = datex2.create_doc(fence)
-                        ic.send_obj(datex_obj)
-                    else:
-                        log.debug("geofence is already in db and has not been updated. Do nothing!")
-        #else:
-        #    log.debug("Missing 'objekter' in vegobjekter from NVDB: {}".format(fences))
+                    log.debug("geofence is already in db and has not been updated. Do nothing!")
 
         time.sleep(sleep_time)
     ic.close()
