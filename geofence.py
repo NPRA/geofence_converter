@@ -18,7 +18,7 @@ def fetch_objects():
             return None
         return req.json()
     except (ConnectionError, Timeout) as ce:
-        log.exception(ce)
+        log.error(ce)
         return None
 
 
