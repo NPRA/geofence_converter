@@ -67,10 +67,9 @@ class Datex2:
     def body(self, name, nvdb_id, version, polygon):
         # Temporary storing of polygon
         gps_coords_poly = [util.utm_to_gps(i) for i in polygon]
-        
+
         # Add meta information
         self._locationContainer(name, nvdb_id, version, gps_coords_poly)
-
 
         self.polygon = gps_coords_poly
 

@@ -47,6 +47,8 @@ class NordicWayIC:
         except MessagingError:
             self.log.exception("Error sending message!")
 
+        self.session.acknowledge()
+
     def send_obj(self, datex_obj):
         """
         Use data from the 'datex2' object to construct a proper
@@ -70,11 +72,14 @@ class NordicWayIC:
                     content=str(datex_obj))
 
         self.log.debug("Sending message: version={}, name={}".format(datex_obj.version, datex_obj.name))
-        
         self.send_messsage(m)
 
     def close(self):
         self.connection.close()
+
+    def recv(self, timeout=None):
+        msg = self.receiver.fetch(timeout=timeout)
+        return msg
 
     def __repr__(self):
         return "<{} url={}, sender={}, receiver={}, options={}>".format(
