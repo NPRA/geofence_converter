@@ -39,7 +39,7 @@ timeout: 300
 
 **Run with config file:**
 ```bash
-$ python -conf ./config.yml
+$ python client.py -conf ./config.yml
 ```
 
 ## Technology?
