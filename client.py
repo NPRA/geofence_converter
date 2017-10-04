@@ -68,8 +68,12 @@ if __name__ == '__main__':
         if not os.path.exists(args.config):
             log.error("Config file was not found..")
             sys.exit(1)
-        with open(args.config, 'r') as f:
-            cfg = yaml.load(f)
+        try:
+            with open(args.config, 'r') as f:
+                cfg = yaml.load(f)
+        except yaml.scanner.ScannerError as se:
+            log.error("Error parsing config file: {}".format(args.config))
+            sys.exit(1)
 
         required_parms = []
         cfg_get = lambda x: cfg.get(x, False)
@@ -80,7 +84,8 @@ if __name__ == '__main__':
 
     else:
         required_parms = []
-        map(required_parms.append, [args.broker_url, args.sender, args.receiver])
+        map(required_parms.append,
+            [args.broker_url, args.sender, args.receiver])
         log.debug("required_parms: {}".format(required_parms))
 
         if not all(required_parms):
@@ -103,7 +108,8 @@ if __name__ == '__main__':
     if cfg.get("broker_url", "").startswith("amqps"):
         # Encrypted amqps session
         if not all([cfg.get("ssl_keyfile"), cfg.get("ssl_certfile")]):
-            log.error("Broker URL uses TLS/SSL. Therefore you need to specify SSL cert and key.")
+            log.error("""Broker URL uses TLS/SSL.
+                Therefore you need to specify SSL cert and key.""")
             sys.exit(1)
 
     log.info("Connecting to {broker_url}".format(**cfg))
@@ -146,10 +152,11 @@ if __name__ == '__main__':
                 if True or storage.is_modified(fence):
                     storage.update(fence)
                     datex_obj = datex2.create_doc(fence)
-                    log.info("New event: message: version={}, name={}".format(datex_obj.version, datex_obj.name))
+                    log.info("New event: message: version={}, name={}"
+                             .format(datex_obj.version, datex_obj.name))
                     ic.send_obj(datex_obj)
                 else:
-                    log.debug("geofence is already in db and has not been updated. Do nothing!")
+                    log.debug("geofence is already in db and has not been updated.")
 
         time.sleep(sleep_time)
     ic.close()
