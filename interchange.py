@@ -6,7 +6,7 @@ import datetime
 import pytz
 
 try:
-    from qpid.messaging import Connection, Message, MessagingError, Empty
+    from qpid.messaging import Connection, Message, MessagingError, Empty, ConnectionError
 except ImportError as ie:
     logging.exception("Unable to find 'qpid' module. Do you have it in sys.path / PYTHONPATH?")
     sys.exit(1)

@@ -12,7 +12,7 @@ import geofence
 import storage
 import datex2
 import time
-from interchange import NordicWayIC
+from interchange import NordicWayIC, ConnectionError
 
 log = logging.getLogger("geofencebroker")
 
@@ -122,7 +122,13 @@ if __name__ == '__main__':
                      cfg.get("password"),
                      options)
     log.debug(ic)
-    ic.connect()
+
+    try:
+        ic.connect()
+    except ConnectionError as e:
+        log.error("Unable to connect to {}".format(cfg.get("broker_url")))
+        log.error(e)
+        sys.exit(1)
 
     if not ic.connection.opened():
         log.error("Unable to connect!")
@@ -141,22 +147,35 @@ if __name__ == '__main__':
 
         # TODO: Check if returned JSON has paging. If so, fetch the rest of
         #       the geofence objects
-        for fence in fences.get("objekter"):
-            if not storage.exists(fence):
-                # New object
-                log.info("New object - schedule event to NordicWayIC with new datex2 doc")
-                datex_obj = datex2.create_doc(fence)
-                storage.add(fence)
-                ic.send_obj(datex_obj)
-            else:
-                if True or storage.is_modified(fence):
-                    storage.update(fence)
+        try:
+            for fence in fences.get("objekter"):
+                if not storage.exists(fence):
+                    # New object
+                    log.info("New object - schedule event to NordicWayIC with new datex2 doc")
                     datex_obj = datex2.create_doc(fence)
-                    log.info("New event: message: version={}, name={}"
-                             .format(datex_obj.version, datex_obj.name))
+                    storage.add(fence)
                     ic.send_obj(datex_obj)
                 else:
-                    log.debug("geofence is already in db and has not been updated.")
+                    if True or storage.is_modified(fence):
+                        storage.update(fence)
+                        datex_obj = datex2.create_doc(fence)
+                        log.info("New event: message: version={}, name={}"
+                                 .format(datex_obj.version, datex_obj.name))
+                        ic.send_obj(datex_obj)
+                    else:
+                        log.debug("geofence is already in db and has not been updated.")
+        except ConnectionError:
+            # Interchange lost its connection
+            log.debug("Interchange connection error. Trying to re-connect. URI: {}".format(cfg.get("broker_url")))
+            while True:
+                try:
+                    ic.connect()
+                    log.debug("Successfully re-connected to {}".format(cfg.get("broker_url")))
+                except ConnectionError:
+                    log.debug("")
+                    time.sleep(5)
+                    continue
+                break
 
         time.sleep(sleep_time)
     ic.close()
