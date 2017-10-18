@@ -33,9 +33,23 @@ class TestDatex2(TestCase):
                    (263943.56601331057, 6648669.00256108),
                    (263803.3365402619, 6650023.6719330065),
                    (262906.3971474045, 6649248.441221254)]
+        centroid = [263059.8558061711, 6649187.586932589]
 
-        d.body(name, nvdb_id, unix_epoch, polygon)
-        print(d)
+        d.body(name, nvdb_id, unix_epoch, polygon, centroid)
+        # print(d)
         
+        self.assertTrue(d.doc.findall("payloadPublication"))
 
+    def test_create_delete_object(self):
+        d = Datex2()
+        name = "Oslo Demo"
+        nvdb_id = "826277828"
+        unix_epoch = calendar.timegm(time.gmtime())
+        
+        polygon = []
+        centroid = [263059.8558061711, 6649187.586932589]
+        
+        d.body(name, nvdb_id, unix_epoch, polygon, centroid)
+        # print(d)
+        
         self.assertTrue(d.doc.findall("payloadPublication"))
