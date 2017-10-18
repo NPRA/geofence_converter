@@ -29,6 +29,37 @@ def create_doc(vegobjekt):
     return doc
 
 
+def create_doc_from_db(geofence, delete=False):
+    """Constructs a valid Datex2 XML doc from the geofence
+    object in our database.
+
+    If delete is True, then the Datex2 object will not contain any
+    polygon points to indicate that the Datex2 object is deleted.
+    """
+    doc = Datex2()
+
+    name = geofence.get("name")
+    nvdb_id = geofence.get("id")
+    version = geofence.get("version")
+
+    polygon = util.parse_polygon(geofence.get("polygon"))
+    polygon = [[float(j) for j in i] for i in polygon]
+    
+    centroid = util.get_polygon_centroid(polygon)
+
+    if delete:
+        polygon = []
+
+    doc.body(name, nvdb_id, version, polygon, centroid)
+    log.debug("Creating new Datex2 document from DB: name={}, nvdb_id={}, version={}".format(
+        name, nvdb_id, version))
+    return doc
+
+
+def create_delete_doc_from_db(geofence):
+    return create_doc_from_db(geofence, delete=True)
+
+
 class Datex2:
     def __init__(self):
         self._file = io.StringIO()
