@@ -21,6 +21,11 @@ def exists(vegobjekt):
     return False
 
 
+def delete(geofence_id):
+    table = vegobjekter()
+    table.delete(id=geofence_id)
+
+
 def add(vegobjekt):
     table_vegobjekter = db.get_table("vegobjekter")
     geofence = convert_to_geofence(vegobjekt)
