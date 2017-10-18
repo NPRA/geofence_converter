@@ -52,6 +52,7 @@ def convert_to_geofence(vegobjekt):
 
     geofence_obj = {
         "id": vegobjekt["id"],
+        "name": geofence.get_name(vegobjekt),
         "href": vegobjekt["href"],
         "sist_modifisert": vegobjekt["metadata"]["sist_modifisert"],
         "version": geofence.get_version(vegobjekt),
