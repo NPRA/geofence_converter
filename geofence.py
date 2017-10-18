@@ -5,6 +5,7 @@ from requests.exceptions import ConnectionError, Timeout
 from util import parse_timestamp, datetime_to_unix_epoch
 import logging
 import six
+import util
 
 
 def fetch_objects():
@@ -35,11 +36,13 @@ def get_polygon(vegobjekt):
             vegobjekt["egenskaper"]))
         return []
 
-    tmp = tmp[0]
-    polygon = tmp["verdi"].replace("POLYGON ((", "").replace("))", "")
-    polygon = [x.strip().split(" ") for x in polygon.split(",")]
+    # tmp = tmp[0]
+    # polygon = tmp["verdi"].replace("POLYGON ((", "").replace("))", "")
+    # polygon = [x.strip().split(" ") for x in polygon.split(",")]
 
-    return polygon
+    # return polygon
+    nvdb_polygon = tmp[0]['verdi']
+    return util.parse_polygon(nvdb_polygon)
 
 
 def get_name(vegobjekt):
@@ -72,6 +75,7 @@ def get_polygon_centroid(polygon_input):
     ref https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon    
     """
     log = logging.getLogger("geofencebroker")
+
 
     # Convert the 2D list of string UTM coordinates
     # to proper float numbers. Need for the calculation
