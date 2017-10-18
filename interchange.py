@@ -46,6 +46,9 @@ class NordicWayIC:
             self.sender.check_error()
         except MessagingError:
             self.log.exception("Error sending message!")
+        except Exception:
+            self.log.exception("Exception occured while sending..")
+            return False
 
         self.session.acknowledge()
 
