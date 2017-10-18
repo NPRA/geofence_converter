@@ -160,15 +160,24 @@ if __name__ == '__main__':
                 if not storage.exists(fence):
                     log.info("New object - schedule event to NordicWayIC with new datex2 doc")
                     datex_obj = datex2.create_doc(fence)
-                    storage.add(fence)
-                    ic.send_obj(datex_obj)
+                    try:
+                        ic.send_obj(datex_obj)
+                    except ConnectionError as ce:
+                        raise ce
+                    else:
+                        storage.add(fence)
                 else:
                     if storage.is_modified(fence):
-                        storage.update(fence)
                         datex_obj = datex2.create_doc(fence)
                         log.info("New event: message: version={}, name={}"
                                  .format(datex_obj.version, datex_obj.name))
-                        ic.send_obj(datex_obj)
+                        try:
+                            ic.send_obj(datex_obj)
+                        except ConnectionError as ce:
+                            raise ce
+                        else:
+                            storage.update(fence)
+
                     else:
                         log.debug("geofence is already in db and has not been updated.")
 
