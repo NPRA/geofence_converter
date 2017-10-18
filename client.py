@@ -150,10 +150,14 @@ if __name__ == '__main__':
 
         # TODO: Check if returned JSON has paging. If so, fetch the rest of
         #       the geofence objects
+        vegobjekt_ids = []
         try:
             for fence in fences.get("objekter"):
+                # Sample all vegobjekt IDs to check if there are anyone that
+                # has been deleted from NVDB
+                vegobjekt_ids.append(int(fence.get("id", 0)))
+
                 if not storage.exists(fence):
-                    # New object
                     log.info("New object - schedule event to NordicWayIC with new datex2 doc")
                     datex_obj = datex2.create_doc(fence)
                     storage.add(fence)
@@ -167,6 +171,22 @@ if __name__ == '__main__':
                         ic.send_obj(datex_obj)
                     else:
                         log.debug("geofence is already in db and has not been updated.")
+
+
+            # Find deleted vegobjekter in NVDB by getting a list of ID's from our 
+            # cache database and list all ID's missing in our JSON from NVDB.
+            vegobjekter = storage.vegobjekter().all()
+            for v in vegobjekter:
+                log.info("inspecting v: {}".format(v.get("id")))
+                if v.get("id") not in vegobjekt_ids:
+                    log.warn("Vegobjekt with ID '{}' removed from NVDB: {}".format(v.get("id"), v))
+                    datex_obj = datex2.create_delete_doc_from_db(v)
+                    ic.send_obj(datex_obj)
+                    log.debug(datex_obj)
+                    storage.delete(v.get("id"))
+                    log.warn("Delete geofence id: {}".format(v.get("id")))
+
+
         except ConnectionError:
             # Interchange lost its connection
             log.debug("Interchange connection error. Trying to re-connect. URI: {}".format(cfg.get("broker_url")))
