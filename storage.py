@@ -24,6 +24,13 @@ def exists(vegobjekt):
 def add(vegobjekt):
     table_vegobjekter = db.get_table("vegobjekter")
     geofence = convert_to_geofence(vegobjekt)
+
+    nvdb_polygon = geofence.get("polygon")
+    polygon = parse_polygon(nvdb_polygon)
+    centroid = get_polygon_centroid(polygon)
+
+    geofence["centroid"] = ','.join(map(str, [centroid[0], centroid[1]]))
+
     table_vegobjekter.insert(geofence)
 
 
@@ -80,4 +87,11 @@ def is_modified(vegobjekt):
 def update(vegobjekt):
     table_vegobjekter = db.get_table("vegobjekter")
     geofence = convert_to_geofence(vegobjekt)
+
+    nvdb_polygon = geofence.get("polygon")
+    polygon = parse_polygon(nvdb_polygon)
+    centroid = get_polygon_centroid(polygon)
+
+    geofence["centroid"] = ','.join(map(str, [centroid[0], centroid[1]]))
+
     table_vegobjekter.update(geofence, ['id'])
