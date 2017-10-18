@@ -137,6 +137,9 @@ if __name__ == '__main__':
     sleep_time = cfg.get("timeout")
     log.debug("Sleeping for {} seconds between each check.".format(sleep_time))
 
+    # hack to create centroids if missing - a one-time operation!
+    storage.fix_centroid()
+
     # Main loop
     while True:
         fences = geofence.fetch_objects()

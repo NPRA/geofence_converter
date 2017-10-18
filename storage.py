@@ -84,6 +84,31 @@ def is_modified(vegobjekt):
     return False
 
 
+def fix_centroid():
+    """Fixes missing centroids if anyone, since we didn't store that before
+    """
+    log = logging.getLogger("geofencebroker")
+    table_vegobjekter = vegobjekter()
+
+    rows = list(table_vegobjekter.find(centroid=None))
+    for row in rows:
+        nvdb_polygon = row.get("polygon")
+        polygon = parse_polygon(nvdb_polygon)
+        centroid = get_polygon_centroid(polygon)
+
+        row["centroid"] = ','.join(map(str, [centroid[0], centroid[1]]))
+
+        update_data = {
+            'id': row.get("id"),
+            'centroid': row["centroid"]
+        }
+
+        table_vegobjekter.update(update_data, ['id'])
+        log.info("Updated geofence object {} with centroid".format(row.get("id")))
+
+    return True
+
+
 def update(vegobjekt):
     table_vegobjekter = db.get_table("vegobjekter")
     geofence = convert_to_geofence(vegobjekt)
