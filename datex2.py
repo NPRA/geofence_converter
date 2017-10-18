@@ -20,8 +20,9 @@ def create_doc(vegobjekt):
     polygon = geofence.get_polygon(vegobjekt)
 
     polygon = [[float(j) for j in i] for i in polygon]
+    centroid = util.get_polygon_centroid(polygon)
 
-    doc.body(name, nvdb_id, version, polygon)
+    doc.body(name, nvdb_id, version, polygon, centroid)
 
     log.debug("Creating new Datex2 document: name={}, nvdb_id={}, version={}".format(
         name, nvdb_id, version))
@@ -64,7 +65,7 @@ class Datex2:
         etree.SubElement(headerInformation, "confidentiality").text = "noRestriction"
         etree.SubElement(headerInformation, "informationStatus").text = "real"
 
-    def body(self, name, nvdb_id, version, polygon):
+    def body(self, name, nvdb_id, version, polygon, centroid):
         # Temporary storing of polygon
         gps_coords_poly = [util.utm_to_gps(i) for i in polygon]
 
@@ -77,7 +78,8 @@ class Datex2:
         log.debug("gps coords: {}".format(gps_coords_poly))
 
         # Calculate centroid of the polygon
-        self.centroid = geofence.get_polygon_centroid(polygon)
+        # self.centroid = geofence.get_polygon_centroid(polygon)
+        self.centroid = centroid
         log.debug("Datex2 centroid: {}".format(self.centroid))
         self.centroid = util.utm_to_gps(self.centroid)
 
