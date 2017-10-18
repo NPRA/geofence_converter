@@ -163,7 +163,7 @@ if __name__ == '__main__':
                     storage.add(fence)
                     ic.send_obj(datex_obj)
                 else:
-                    if True or storage.is_modified(fence):
+                    if storage.is_modified(fence):
                         storage.update(fence)
                         datex_obj = datex2.create_doc(fence)
                         log.info("New event: message: version={}, name={}"
