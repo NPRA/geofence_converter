@@ -3,13 +3,18 @@
 import datetime
 import calendar
 import utm
+import six
 
 
 def datetime_to_unix_epoch(timestamp):
+    """Converts datetime instance to UNIX epoch time
+    """
     return calendar.timegm(timestamp.timetuple())
 
 
 def parse_timestamp(timestamp):
+    """New datetime object parse from a string (timestamp)
+    """
     return datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 
 
