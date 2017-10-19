@@ -24,7 +24,7 @@ def create_doc(vegobjekt):
 
     doc.body(name, nvdb_id, version, polygon, centroid)
 
-    log.debug("Creating new Datex2 document: name={}, nvdb_id={}, version={}".format(
+    log.debug(u"Creating new Datex2 document: name={}, nvdb_id={}, version={}".format(
         name, nvdb_id, version))
     return doc
 
@@ -44,14 +44,14 @@ def create_doc_from_db(geofence, delete=False):
 
     polygon = util.parse_polygon(geofence.get("polygon"))
     polygon = [[float(j) for j in i] for i in polygon]
-    
+
     centroid = util.get_polygon_centroid(polygon)
 
     if delete:
         polygon = []
 
     doc.body(name, nvdb_id, version, polygon, centroid)
-    log.debug("Creating new Datex2 document from DB: name={}, nvdb_id={}, version={}".format(
+    log.debug(u"Creating new Datex2 document from DB: name={}, nvdb_id={}, version={}".format(
         name, nvdb_id, version))
     return doc
 
