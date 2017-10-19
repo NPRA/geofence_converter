@@ -13,6 +13,7 @@ import storage
 import datex2
 import time
 from interchange import NordicWayIC, ConnectionError
+from util import slack_notify
 
 log = logging.getLogger("geofencebroker")
 
@@ -131,22 +132,27 @@ if __name__ == '__main__':
                      options)
     log.debug(ic)
 
-    try:
-        ic.connect()
-    except ConnectionError as e:
-        log.error("Unable to connect to {}".format(cfg.get("broker_url")))
-        log.error(e)
-        sys.exit(1)
+    # try:
+    #     ic.connect()
+    # except ConnectionError as e:
+    #     log.error("Unable to connect to {}".format(cfg.get("broker_url")))
+    #     log.error(e)
+    #     sys.exit(1)
 
-    if not ic.connection.opened():
-        log.error("Unable to connect!")
-        sys.exit(1)
+    # if not ic.connection.opened():
+    #     log.error("Unable to connect!")
+    #     sys.exit(1)
 
     sleep_time = cfg.get("timeout")
     log.debug("Sleeping for {} seconds between each check.".format(sleep_time))
 
     # hack to create centroids if missing - a one-time operation!
     storage.fix_centroid()
+    slack_url = cfg.get("slack_webhook_url", None)
+    slack_notify(
+        "Geofence is up and running! Will check periodically every {} second".format(sleep_time),
+        slack_url)
+
 
     # Main loop
     while True:
@@ -160,14 +166,25 @@ if __name__ == '__main__':
         #       the geofence objects
         vegobjekt_ids = []
         try:
+            ic.connect()
+            log.debug("Connect to interchange.")
             for fence in fences.get("objekter"):
                 # Sample all vegobjekt IDs to check if there are anyone that
                 # has been deleted from NVDB
                 vegobjekt_ids.append(int(fence.get("id", 0)))
 
                 if not storage.exists(fence):
-                    log.info("New object - schedule event to NordicWayIC with new datex2 doc")
                     datex_obj = datex2.create_doc(fence)
+                    #datex_obj.name = unicode("TestÆØÅ-New")
+
+                    msg = u"New geofence: id={}, version={}, name={}".format(
+                        fence.get("id"), datex_obj.version, datex_obj.name)
+                    log.info(msg)
+                    try:
+                        slack_notify(msg, slack_url)
+                    except Exception:
+                        log.warn("Unable to send slack notification")
+
                     try:
                         ic.send_obj(datex_obj)
                     except ConnectionError as ce:
@@ -177,8 +194,11 @@ if __name__ == '__main__':
                 else:
                     if storage.is_modified(fence):
                         datex_obj = datex2.create_doc(fence)
-                        log.info("New event: message: version={}, name={}"
-                                 .format(datex_obj.version, datex_obj.name))
+                        # datex_obj.name = unicode("TestÆØÅ")
+                        msg = u"Modified geofence: message: id={}, version={}, name={}".format(
+                            fence.get("id"), datex_obj.version, datex_obj.name)
+                        log.info(msg)
+                        slack_notify(msg, slack_url)
                         try:
                             ic.send_obj(datex_obj)
                         except ConnectionError as ce:
@@ -186,36 +206,40 @@ if __name__ == '__main__':
                         else:
                             storage.update(fence)
 
-                    else:
-                        log.debug("geofence is already in db and has not been updated.")
+                    # else:
+                        # log.debug("geofence is already in db and has not been updated.")
 
 
-            # Find deleted vegobjekter in NVDB by getting a list of ID's from our 
+            # Find deleted vegobjekter in NVDB by getting a list of ID's from our
             # cache database and list all ID's missing in our JSON from NVDB.
             vegobjekter = storage.vegobjekter().all()
             for v in vegobjekter:
-                log.info("inspecting v: {}".format(v.get("id")))
+                # log.debug("inspecting v: {}".format(v.get("id")))
                 if v.get("id") not in vegobjekt_ids:
-                    log.warn("Vegobjekt with ID '{}' removed from NVDB: {}".format(v.get("id"), v))
+                    msg = "Vegobjekt with ID '{}' removed from NVDB: {}".format(v.get("id"), v)
+                    log.warn(msg)
+                    slack_notify(msg, slack_url)
                     datex_obj = datex2.create_delete_doc_from_db(v)
                     ic.send_obj(datex_obj)
                     log.debug(datex_obj)
                     storage.delete(v.get("id"))
                     log.warn("Delete geofence id: {}".format(v.get("id")))
 
-
         except ConnectionError:
             # Interchange lost its connection
             log.debug("Interchange connection error. Trying to re-connect. URI: {}".format(cfg.get("broker_url")))
-            while True:
-                try:
-                    ic.connect()
-                    log.debug("Successfully re-connected to {}".format(cfg.get("broker_url")))
-                except ConnectionError:
-                    log.debug("")
-                    time.sleep(5)
-                    continue
-                break
+            #while True:
+            #    try:
+            #        ic.connect()
+            #        log.debug("Successfully re-connected to {}".format(cfg.get("broker_url")))
+            #    except ConnectionError:
+            #        log.debug("")
+            #        time.sleep(5)
+            #        continue
+            #    break
+        else:
+            log.debug("Disconnect interchange.")
+            ic.close()
 
         time.sleep(sleep_time)
     ic.close()
