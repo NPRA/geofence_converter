@@ -48,7 +48,6 @@ class NordicWayIC:
             self.log.exception("Error sending message!")
         except Exception:
             self.log.exception("Exception occured while sending..")
-            return False
 
         self.session.acknowledge()
 
@@ -74,7 +73,8 @@ class NordicWayIC:
                     properties=prop,
                     content=str(datex_obj))
 
-        self.log.debug("Sending message: version={}, name={}".format(datex_obj.version, datex_obj.name))
+        self.log.debug(u"Sending message: version={}, name={}".format(
+            datex_obj.version, datex_obj.name))
         self.send_messsage(m)
 
     def close(self):
