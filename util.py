@@ -86,7 +86,7 @@ def get_polygon_centroid(polygon_input):
 
 
 def slack_notify(msg, url):
-    cmd = """curl -X POST --data-urlencode \
+    cmd = """curl -s -S -X POST --data-urlencode \
         'payload={{"channel": "#tran-notifications", "username": "webhookbot", \
         "text": "{}", \
         "icon_emoji": ":ghost:"}}' \
