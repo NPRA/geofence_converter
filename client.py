@@ -37,6 +37,9 @@ def init_logging(debug_env_var):
                         level_styles=level_style_override,
                         field_styles=field_style_override)
 
+    qpid_log = logging.getLogger("qpid.messaging")
+    qpid_log.setLevel(logging.INFO)
+
     # ch = logging.StreamHandler(stream=sys.stdout)
     # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     # ch.setFormatter(formatter)
@@ -111,6 +114,11 @@ if __name__ == '__main__':
             log.error("""Broker URL uses TLS/SSL.
                 Therefore you need to specify SSL cert and key.""")
             sys.exit(1)
+
+    # Enable reconnection option
+    options.update({
+        "reconnect": True
+    })
 
     log.info("Connecting to {broker_url}".format(**cfg))
     log.info(" sender: {sender}, receiver: {receiver}".format(**cfg))
