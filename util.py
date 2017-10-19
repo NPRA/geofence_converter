@@ -4,6 +4,9 @@ import datetime
 import calendar
 import utm
 import six
+import shlex
+import subprocess
+import logging
 
 
 def datetime_to_unix_epoch(timestamp):
@@ -80,3 +83,20 @@ def get_polygon_centroid(polygon_input):
         raise
     else:
         return tuple(centroid)
+
+
+def slack_notify(msg, url):
+    cmd = """curl -X POST --data-urlencode \
+        'payload={{"channel": "#tran-notifications", "username": "webhookbot", \
+        "text": "{}", \
+        "icon_emoji": ":ghost:"}}' \
+        {}"""
+    splitted_args = cmd.format(msg, url)
+    args = shlex.split(splitted_args)
+    log = logging.getLogger("geofencebroker")
+    try:
+        #  subprocess.run(args, check=True)
+        subprocess.check_call(args)
+    except subprocess.CalledProcessError as e:
+        log.error("Unable to send Slack notification!")
+        log.exception(e)
