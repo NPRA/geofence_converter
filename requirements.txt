@@ -10,7 +10,7 @@ humanfriendly==4.4.1
 idna==2.6
 ipython==5.4.1
 ipython-genutils==0.2.0
-lxml==4.6.3
+lxml==4.9.1
 Mako==1.0.7
 MarkupSafe==1.0
 monotonic==1.3
